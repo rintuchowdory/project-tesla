@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesla AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .tesla-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #e82127; /* Tesla red */
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #e82127;
+        }
+
+        button {
+            background: #e82127;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #c41a1a;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .response-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 100px;
+            text-align: left;
+        }
+
+        .loading {
+            display: none;
+            color: #666;
+            font-style: italic;
+        }
+
+        .error {
+            color: #e82127;
+            display: none;
+        }
+
+        .success {
+            color: #28a745;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tesla-icon">⚡</div>
+        <h1>Tesla AI Assistant</h1>
+        
+        <div class="input-group">
+            <input type="text" id="questionInput" placeholder="Ask Nikola Tesla anything..." onkeypress="handleKeyPress(event)">
+        </div>
+        
+        <button onclick="askTesla()" id="askButton">Ask Tesla</button>
+        
+        <div class="response-container">
+            <div id="loading" class="loading">Tesla is thinking...</div>
+            <div id="error" class="error"></div>
+            <div id="response" class="success"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://github2006.execute-api.eu-central-1.amazonaws.com/Prod/ask';
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                askTesla();
+            }
+        }
+
+        async function askTesla() {
+            const question = document.getElementById('questionInput').value.trim();
+            const askButton = document.getElementById('askButton');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const response = document.getElementById('response');
+
+            // Reset states
+            error.style.display = 'none';
+            response.style.display = 'none';
+            loading.style.display = 'block';
+            askButton.disabled = true;
+
+            if (!question) {
+                showError('Please enter a question');
+                return;
+            }
+
+            try {
+                const result = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await result.json();
+
+                if (result.ok) {
+                    showResponse(data.response || data.body?.response || 'No response received');
+                } else {
+                    showError(data.error || 'Failed to get response from Tesla');
+                }
+            } catch (err) {
+                showError('Network error: ' + err.message);
+            } finally {
+                loading.style.display = 'none';
+                askButton.disabled = false;
+            }
+        }
+
+        function showResponse(message) {
+            const response = document.getElementById('response');
+            const error = document.getElementById('error');
+            
+            error.style.display = 'none';
+            response.innerHTML = `<strong>Tesla:</strong> ${message}`;
+            response.style.display = 'block';
+        }
+
+        function showError(message) {
+            const response = document.getElementById('response');
+            const error = document.getElementById('error');
+            const loading = document.getElementById('loading');
+            
+            loading.style.display = 'none';
+            response.style.display = 'none';
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
