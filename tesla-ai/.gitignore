@@ -4,3 +4,20 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+# --- Downloaded Tools & Binaries ---
+/kubectl
+/minikube-linux-amd64
+.minikube/
+
+# --- IDE & Editor configs ---
+.vscode/
+.idea/
+
+# --- OS Metadata ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
